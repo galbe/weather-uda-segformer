@@ -183,6 +183,10 @@ Validation mIoU oscillated around 37–38% after iteration 14,000 without surpas
 
 *Note: "Before Step 2" evaluates the Step 1 checkpoint on ACDC without any Step 2 training (measured at iteration 50 of Step 2, before meaningful adaptation). "After Step 2" uses the best checkpoint from Step 2 training (iteration 9,000), selected by ACDC val mIoU.*
 
+![Figure 1: ACDC per-condition mIoU before and after Step 2](figures/fig_before_after_bar.png)
+
+**Figure 1:** Per-condition ACDC validation mIoU before and after the Step 2 adaptation (partial-data B2 pipeline). Light bars show the Step 1 checkpoint evaluated directly on ACDC (unadapted baseline); dark bars show the best Step 2 checkpoint. Delta values are annotated above each dark bar; the night regression (−3.1 pp) is highlighted in red.
+
 The second adaptation step yields a net improvement of **+5.52 mIoU points** overall. The per-condition gains are strongly asymmetric: fog shows the largest absolute gain (+12.3 pp), followed by rain (+9.4 pp) and snow (+8.6 pp). Night is the only condition that regresses after Step 2 (−3.1 pp). This asymmetry is discussed in Section 6.
 
 **Table 4: Full-data pipeline results (placeholders — to be updated on completion).**
@@ -208,6 +212,10 @@ The magnitude of the improvement reflects the combined effect of the two-step de
 Night is the hardest condition in every experiment — consistently scoring below 12% mIoU, while fog, rain, and snow score 29–46%. Night is qualitatively different from the other three adverse conditions. Fog, rain, and snow are primarily photometric distortions of daylight scene appearance: they attenuate contrast, scatter light, and reduce texture sharpness, but the underlying illumination model remains similar to the training domain. Night involves a fundamentally different illumination regime — low ambient light, artificial point sources, harsh local contrasts — that places images far outside the photometric envelope of GTA5 or daytime Cityscapes.
 
 The finding that night *regresses* after Step 2 (−3.1 pp: 11.5% → 8.4%) is scientifically important. The Step 1 model, trained on daytime synthetic and real data, already lacks reliable representations for nighttime imagery. When used as the teacher in Step 2, it generates pseudo-labels on ACDC night images that are dominated by high-confidence, easily visible classes (road surface, building, sky) while suppressing low-confidence classes (pedestrians, traffic signs, traffic lights) that are critical for safe autonomous driving but visually ambiguous at night. The Step 2 training loop then reinforces this class imbalance: the student learns to confidently predict the dominant classes while ignoring the rest. The result is a model that is, paradoxically, worse at night after adaptation than before.
+
+![Figure 2: Step 2 per-condition adaptation curve](figures/fig_step2_adaptation_curve.png)
+
+**Figure 2:** Per-condition mIoU over Step 2 training iterations (top panel) and overall mIoU (bottom panel). The dashed vertical line marks the best checkpoint at iteration 9,000. Fog, rain, and snow rise steadily throughout training; night drops immediately at iteration 1,000 and flatlines near 8% for the remainder of training, confirming that the pseudo-labeling loop has no corrective signal for the nighttime domain.
 
 This is a principled negative result: it reveals a fundamental limitation of pseudo-label-based UDA under extreme domain shifts. Purely unsupervised pseudo-labeling cannot self-correct a systematic blind spot in the teacher model; it tends to amplify existing biases rather than overcome them. Night-specific interventions would be required — for example, condition-specific sampling (over-representing night images), condition-specific thresholds (applying a lower τ for night than for fog), or reference-paired contrastive training using ACDC's clear-weather counterparts.
 
