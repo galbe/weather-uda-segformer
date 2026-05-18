@@ -158,6 +158,34 @@ while i < len(lines):
         text = line[4:].strip()
         heading(text, 3, size=12, space_before=10, space_after=3)
 
+    # Image  ![alt](path)
+    elif line.startswith('!['):
+        m = re.match(r'!\[([^\]]*)\]\(([^)]+)\)', line)
+        if m:
+            img_path = m.group(2)
+            try:
+                doc.add_picture(img_path, width=Inches(5.5))
+                doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+            except Exception:
+                body(f'[Figure: {img_path}]', italic=True)
+
+    # Bullet list (- item)
+    elif re.match(r'^- ', line):
+        text = line[2:].strip()
+        p = doc.add_paragraph(style='List Bullet')
+        p.paragraph_format.space_after = Pt(3)
+        parts = re.split(r'(\*\*[^*]+\*\*|\*[^*]+\*)', text)
+        for part in parts:
+            if part.startswith('**') and part.endswith('**'):
+                run = p.add_run(part[2:-2])
+                set_font(run, bold=True, size=11)
+            elif part.startswith('*') and part.endswith('*'):
+                run = p.add_run(part[1:-1])
+                set_font(run, italic=True, size=11)
+            else:
+                run = p.add_run(part)
+                set_font(run, size=11)
+
     # Block quote / note (starts with >)
     elif line.startswith('>'):
         text = line[1:].strip()
