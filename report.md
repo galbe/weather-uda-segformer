@@ -31,6 +31,8 @@ The central research question of this work is:
 
 To answer this we evaluate the Step 1 model directly on ACDC (the *before-step-2* baseline) and compare it against the Step 2 model (the *after-step-2* result), reporting both overall mIoU and per-condition mIoU across fog, rain, snow, and night splits.
 
+Beyond autonomous driving, the two-step UDA principle is broadly applicable. The key structural requirement is a labeled synthetic source, an accessible intermediate real-world domain, and a hard unlabeled target that is too distant to reach in a single adaptation step — a configuration that arises in medical imaging (synthetic scans → one scanner type → a noisier or lower-quality scanner), satellite and aerial imagery (one season or region → another), and outdoor robotics perception. In all of these settings, factoring a large domain gap into two smaller, more tractable hops allows each step to exploit a clear intermediate signal rather than attempting a single leap across compounded shifts. This work provides a concrete, measured instantiation of that principle in the adverse-weather segmentation setting, quantifying how much each hop contributes and identifying when Step 1 quality determines whether the hardest subdomain benefits or regresses.
+
 The rest of this paper is organized as follows. Section 2 reviews related work on UDA for semantic segmentation. Section 3 describes the method. Section 4 details the experimental setup. Section 5 presents results. Section 6 discusses the findings. Section 7 concludes.
 
 ---
