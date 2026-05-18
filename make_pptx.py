@@ -258,14 +258,28 @@ header_bar(sl, 'Per-Condition Results', 'Before vs. After Step 2 — partial-dat
 add_image(sl, 'figures/fig_before_after_bar.png', 1.5, 1.2, 10.3)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SLIDE 7 — Figure 2: Adaptation curve
+# SLIDE 7 — Adaptation curve (partial)
 # ─────────────────────────────────────────────────────────────────────────────
 sl = add_slide()
 header_bar(sl, 'Step 2 Adaptation Curve', 'Per-condition mIoU over training — partial-data run')
 add_image(sl, 'figures/fig_step2_adaptation_curve.png', 1.0, 1.1, 11.3)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SLIDE 8 — Key Finding: Natural Experiment
+# SLIDE 8 — Figure: Before/After bar chart (full-data)
+# ─────────────────────────────────────────────────────────────────────────────
+sl = add_slide()
+header_bar(sl, 'Per-Condition Results — Full-Data Pipeline', 'Before vs. After Step 2 — 24,966 GTA5 pairs, Step 1: 38.90% CS val')
+add_image(sl, 'figures/fig_before_after_bar_full.png', 1.5, 1.2, 10.3)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SLIDE 9 — Adaptation curve (full-data)
+# ─────────────────────────────────────────────────────────────────────────────
+sl = add_slide()
+header_bar(sl, 'Step 2 Adaptation Curve — Full-Data Pipeline', 'All four conditions improve, including night — best checkpoint at iter 5,000')
+add_image(sl, 'figures/fig_step2_adaptation_curve_full.png', 1.0, 1.1, 11.3)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SLIDE 10 (was 8) — Key Finding: Natural Experiment
 # ─────────────────────────────────────────────────────────────────────────────
 sl = add_slide()
 header_bar(sl, 'Key Finding: The Natural Experiment', 'One variable changed — night flips')
