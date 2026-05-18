@@ -1,0 +1,30 @@
+# ── UDA Step 1: GTA5 (labeled source) → Cityscapes (unlabeled target) ──────
+# B2 encoder, full GTA5 dataset (24,966 pairs), 40K iters
+name: step1_gta2cs_b2_full
+step: 1
+
+data:
+  gta5_root:       ~/data/gta5
+  cityscapes_root: ~/data/cityscapes
+  acdc_root:       ~/data/acdc
+  output_root:     ~/projects/weather-uda-segformer/outputs
+
+model:
+  checkpoint: nvidia/mit-b2
+  num_labels: 19
+
+training:
+  crop_size:        512
+  batch_size:       2          # per domain; effective = 4
+  max_iters:        40000
+  lr:               6.0e-5
+  weight_decay:     0.01
+  mixed_precision:  true       # bfloat16 on A100 (no scaler needed)
+  pseudo_threshold: 0.9
+  ema_decay:        0.9999
+  lambda_u:         1.0
+  log_interval:     100
+  eval_interval:    2000
+  save_interval:    10000
+
+seed: 42

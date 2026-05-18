@@ -1,0 +1,22 @@
+data:
+  cityscapes_root: ~/data/cityscapes        # leftImg8bit/ and gtFine/ live here
+  acdc_root:       ~/data/acdc              # rgb_anon/ and gt/ live here
+  gta5_root:       ~/data/gta5             # images/ and labels/ live here (optional)
+  output_root:     ~/projects/weather-uda-segformer/outputs
+
+model:
+  name: nvidia/mit-b2                       # SegFormer-B2 encoder backbone
+  num_labels: 19                            # Cityscapes / ACDC class count
+  image_size: [512, 512]
+
+training:
+  batch_size: 8
+  lr: 6.0e-5
+  epochs: 40
+  mixed_precision: true                     # bf16 on A100
+
+acdc_conditions:
+  - fog
+  - rain
+  - snow
+  - night

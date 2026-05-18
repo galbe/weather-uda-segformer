@@ -1,0 +1,36 @@
+# ── UDA Step 2: Cityscapes (labeled source) → ACDC (unlabeled target) ───────
+# Initialize from step1_gta2cs/best.pth
+name: step2_cs2acdc
+step: 2
+
+data:
+  gta5_root:       ~/data/gta5
+  cityscapes_root: ~/data/cityscapes
+  acdc_root:       ~/data/acdc
+  output_root:     ~/projects/weather-uda-segformer/outputs
+
+model:
+  checkpoint: nvidia/mit-b2   # architecture spec only; weights loaded via --resume
+  num_labels: 19
+
+training:
+  crop_size:        512
+  batch_size:       2
+  max_iters:        10000
+  lr:               6.0e-5
+  weight_decay:     0.01
+  mixed_precision:  true
+  pseudo_threshold: 0.9
+  ema_decay:        0.9999
+  lambda_u:         1.0
+  log_interval:     100
+  eval_interval:    1000
+  save_interval:    5000
+
+acdc_conditions:
+  - fog
+  - rain
+  - snow
+  - night
+
+seed: 42

@@ -1,0 +1,30 @@
+# ── UDA Step 1: GTA5 (labeled source) → Cityscapes (unlabeled target) ──────
+# SegFormer-B5 backbone (~82M params, vs ~25M for B2)
+name: step1_gta2cs_b5
+step: 1
+
+data:
+  gta5_root:       ~/data/gta5
+  cityscapes_root: ~/data/cityscapes
+  acdc_root:       ~/data/acdc
+  output_root:     ~/projects/weather-uda-segformer/outputs
+
+model:
+  checkpoint: nvidia/mit-b5
+  num_labels: 19
+
+training:
+  crop_size:        512
+  batch_size:       1          # per domain; effective = 2 (B5 needs more VRAM than B2)
+  max_iters:        20000
+  lr:               6.0e-5
+  weight_decay:     0.01
+  mixed_precision:  true
+  pseudo_threshold: 0.9
+  ema_decay:        0.9999
+  lambda_u:         1.0
+  log_interval:     100
+  eval_interval:    2000
+  save_interval:    5000
+
+seed: 42

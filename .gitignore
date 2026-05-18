@@ -1,0 +1,21 @@
+# Checkpoints and large outputs
+outputs/
+__pycache__/
+*.pyc
+*.pyo
+*.pth
+*.pt
+
+# Data (too large)
+~/data/
+
+# Logs that are regenerated
+*.log
+
+# Python env
+*.egg-info/
+.env
+venv/
+
+# OS
+.DS_Store

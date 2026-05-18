@@ -1,0 +1,39 @@
+# ── UDA Step 2 v2: Cityscapes → ACDC  [VALIDATION / FIXED CONFIG] ────────────
+# Changes vs v1: threshold 0.9→0.8, lr 6e-5→3e-5, iters 10K→20K
+# Reason: v1 peaked at iter 2K then degraded — threshold too strict on adverse
+#         weather, LR too high for fine-tuning from a pre-adapted checkpoint.
+name: step2_cs2acdc_b5_v2
+step: 2
+
+data:
+  gta5_root:       ~/data/gta5
+  cityscapes_root: ~/data/cityscapes
+  acdc_root:       ~/data/acdc
+  output_root:     ~/projects/weather-uda-segformer/outputs
+
+model:
+  checkpoint: nvidia/mit-b5
+  num_labels: 19
+
+training:
+  crop_size:        512
+  batch_size:       1          # per domain; effective = 2 (B5 VRAM limit)
+  max_iters:        20000
+  lr:               3.0e-5     # halved — fine-tuning from pre-adapted checkpoint
+  weight_decay:     0.01
+  mixed_precision:  true
+  pseudo_threshold: 0.8        # lowered — adverse weather has lower confidence
+  grad_accum_steps: 2          # simulates bs=2+2 without extra VRAM
+  ema_decay:        0.9999
+  lambda_u:         1.0
+  log_interval:     100
+  eval_interval:    2000
+  save_interval:    5000
+
+acdc_conditions:
+  - fog
+  - rain
+  - snow
+  - night
+
+seed: 42
