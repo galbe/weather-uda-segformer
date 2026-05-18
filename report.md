@@ -106,13 +106,11 @@ Training uses AdamW [Loshchilov and Hutter, 2019] with polynomial learning rate 
 
 For the full-data run, training is stopped when the learning rate decays to 2×10⁻⁵ — exactly one third of the initial 6×10⁻⁵ — corresponding to approximately iteration 26,667 of the 40,000-iteration polynomial schedule. This threshold was chosen as a principled early-stopping criterion: below this point the learning rate signal is sufficiently weak that further updates yield diminishing returns, while stopping here substantially reduces exposure to infrastructure-level interruptions without meaningfully sacrificing final mIoU. The best validation checkpoint achieved before this threshold is used for all downstream evaluation and Step 2 initialization.
 
-**Step 2 — Cityscapes → ACDC.** The Step 1 best checkpoint initializes both student and teacher. Cityscapes training images with their ground-truth labels serve as the labeled source; the ACDC training split (400 images each across fog, rain, snow, and night) serves as the unlabeled target. The pseudo-label threshold is lowered to τ = 0.8, and the learning rate is halved to 3×10⁻⁵.
-
-Step 2 uses the same base learning rate (6×10⁻⁵) and pseudo-label threshold (τ = 0.9) as Step 1, keeping hyperparameters constant across both adaptation steps to isolate the effect of the domain shift rather than hyperparameter choices. The polynomial LR schedule decays from 6×10⁻⁵ to 0 over 10,000 iterations, providing a shorter but well-paced fine-tuning regime for the adverse-weather adaptation.
+**Step 2 — Cityscapes → ACDC.** The Step 1 best checkpoint initializes both student and teacher. Cityscapes training images with their ground-truth labels serve as the labeled source; the ACDC training split (400 images each across fog, rain, snow, and night) serves as the unlabeled target. The same base learning rate (6×10⁻⁵) and pseudo-label threshold (τ = 0.9) are used as in Step 1, keeping hyperparameters constant across both adaptation steps to isolate the effect of the domain shift rather than hyperparameter choices. The polynomial LR schedule decays from 6×10⁻⁵ to 0 over 10,000 iterations, providing a shorter but well-paced fine-tuning regime for the adverse-weather adaptation.
 
 ### 3.4 Partial-Data Validation Protocol
 
-Before committing to the computationally expensive full-data training, a partial-data validation run was conducted. Step 1 was trained for 2,000 iterations on approximately 10,000 available labeled GTA5 pairs (the remaining GTA5 archives were unavailable at the time), and the resulting checkpoint was used to test the Step 2 configuration end-to-end. This produced the *partial-data pipeline* results reported as the primary confirmed baseline in this paper. The partial run validated that: (i) the lowered threshold and learning rate in Step 2 are necessary and sufficient to yield positive adaptation, and (ii) the Mean Teacher framework is stable across both steps. The *full-data pipeline* (Step 1 on 24,966 GTA5 pairs; Step 2 initialized from full-data Step 1 best checkpoint) is ongoing, and its results are marked with explicit placeholders throughout.
+Before committing to the computationally expensive full-data training, a partial-data validation run was conducted. Step 1 was trained for 2,000 iterations on approximately 10,000 available labeled GTA5 pairs (the remaining GTA5 archives were unavailable at the time), and the resulting checkpoint was used to test the Step 2 configuration end-to-end. This produced the *partial-data pipeline* results reported as the primary confirmed baseline in this paper. The partial run validated that: (i) keeping the same threshold and learning rate across both steps is sufficient to yield positive adaptation, and (ii) the Mean Teacher framework is stable across both steps. The *full-data pipeline* (Step 1 on 24,966 GTA5 pairs; Step 2 initialized from full-data Step 1 best checkpoint) is ongoing, and its results are marked with explicit placeholders throughout.
 
 ---
 
@@ -135,7 +133,7 @@ Before committing to the computationally expensive full-data training, a partial
 | Backbone | SegFormer-B2 | SegFormer-B2 |
 | Encoder initialization | ImageNet-22K (nvidia/mit-b2) | Step 1 best checkpoint |
 | Max iterations | 40,000 planned / 2,000 (partial) | 10,000 |
-| Stopping criterion (full) | LR ≤ 2×10⁻⁵ (~iter 26,667); best checkpoint @ iter 14,000 | — |
+| Stopping criterion (full) | LR ≤ 2×10⁻⁵ (~iter 26,667); best checkpoint @ iter 24,000 | — |
 | Crop size | 512 × 512 | 512 × 512 |
 | Batch size (per domain) | 2 | 2 |
 | Base learning rate | 6 × 10⁻⁵ | 6 × 10⁻⁵ |
@@ -165,11 +163,11 @@ The *before-step-2* evaluation applies the Step 1 checkpoint directly to ACDC at
 | Backbone | GTA5 pairs (approx.) | Iterations | CS val mIoU |
 |---|---|---|---|
 | SegFormer-B2 | ~10,000 (partial) | 2,000 | 30.30% |
-| SegFormer-B2 | 24,966 (full) | ~26,667 (LR ≤ 2×10⁻⁵) | **38.86%** (best @ iter 14,000) |
+| SegFormer-B2 | 24,966 (full) | ~26,800 (LR ≤ 2×10⁻⁵) | **38.90%** (best @ iter 24,000) |
 
-The partial-data run reached 30.30% CS val mIoU at iteration 2,000, providing a functional baseline for validating the Step 2 configuration. The full-data run achieved a best checkpoint of **38.86% mIoU at iteration 14,000** — an improvement of **+8.56 pp** over the partial-data baseline, confirming the strong effect of source dataset completeness on Step 1 quality.
+The partial-data run reached 30.30% CS val mIoU at iteration 2,000, providing a functional baseline for validating the Step 2 configuration. The full-data run achieved a best checkpoint of **38.90% mIoU at iteration 24,000** — an improvement of **+8.60 pp** over the partial-data baseline, confirming the strong effect of source dataset completeness on Step 1 quality.
 
-Validation mIoU oscillated around 37–38% after iteration 14,000 without surpassing the iter-14,000 peak, indicating convergence. This oscillation is a known characteristic of Mean Teacher pseudo-label training: the teacher's pseudo-labels on the unlabeled target shift as EMA weights evolve, and the competing source and target losses create a slow feedback cycle that prevents monotonic improvement once the model has settled near its optimum. Continued training beyond this point confirmed convergence rather than producing further gains; the iter-14,000 checkpoint is used as the Step 1 result for all downstream evaluation and Step 2 initialization.
+Validation mIoU progressed from 36.45% at iter 16,000 to 37.81% (18K), 38.33% (20K), then peaked at 38.90% at iter 24,000 before falling back to 37.37% at iter 26,000. This non-monotonic trajectory is a known characteristic of Mean Teacher pseudo-label training: the teacher's pseudo-labels on the unlabeled target shift as EMA weights evolve, and the competing source and target losses create a slow feedback cycle that prevents steady improvement once the model has settled near its optimum. Training was stopped at iter 26,800 (LR = 1.99×10⁻⁵); the iter-24,000 checkpoint is used as the Step 1 result for all downstream evaluation and Step 2 initialization.
 
 ### 5.2 Main Results: Before and After Step 2 on ACDC
 
@@ -205,7 +203,7 @@ The second adaptation step yields a net improvement of **+5.52 mIoU points** ove
 
 Yes. For the partial-data B2 pipeline, Step 2 provides a substantial overall improvement of **+5.52 mIoU points** on ACDC (27.20% → 32.72%), achieved entirely without labeled ACDC annotations. The gain confirms that the Cityscapes-initialized pseudo-labeling loop on ACDC successfully shifts the model's decision boundaries toward the adverse-weather domain. The adaptation is non-trivial: ACDC images differ qualitatively from Cityscapes in illumination, contrast, texture statistics, and the presence of weather-specific artifacts.
 
-The magnitude of the improvement reflects the combined effect of the two-step design: Step 1 produces a model that already understands real urban geometry, and Step 2 then redirects those representations toward adverse weather. The transition from 27.20% (unadapted) to 32.72% (adapted) demonstrates that even a partial-data Step 1 — trained on only ~10,000 GTA5 pairs and stopped at iteration 2,000 — generates pseudo-labels on ACDC that are informative enough to drive meaningful adaptation. The full-data pipeline, with a Step 1 best checkpoint already at 38.86% CS val mIoU, is expected to show an even larger Step 2 gain: stronger Step 1 features yield cleaner pseudo-labels, which in turn drive more accurate Step 2 adaptation.
+The magnitude of the improvement reflects the combined effect of the two-step design: Step 1 produces a model that already understands real urban geometry, and Step 2 then redirects those representations toward adverse weather. The transition from 27.20% (unadapted) to 32.72% (adapted) demonstrates that even a partial-data Step 1 — trained on only ~10,000 GTA5 pairs and stopped at iteration 2,000 — generates pseudo-labels on ACDC that are informative enough to drive meaningful adaptation. The full-data pipeline, with a Step 1 best checkpoint already at 38.90% CS val mIoU, is expected to show an even larger Step 2 gain: stronger Step 1 features yield cleaner pseudo-labels, which in turn drive more accurate Step 2 adaptation.
 
 ### 6.2 Condition-Specific Analysis: Night as a Persistent Challenge
 
@@ -237,7 +235,7 @@ This paper investigated whether a two-step UDA pipeline — GTA5 → Cityscapes 
 
 For the partial-data B2 pipeline, Step 2 yields a net overall improvement of **+5.52 mIoU points** on ACDC (27.20% → 32.72%). The improvement is condition-specific: fog benefits most (+12.3 pp), rain and snow improve substantially (+9.4, +8.6 pp), and night uniquely regresses (−3.1 pp), reflecting the fundamental limitation of pseudo-label-based UDA when the teacher model has no nighttime representations to offer. Night remains the hardest condition in every experiment, consistently scoring below 12% mIoU.
 
-The full-data B2 pipeline — training Step 1 on the complete 24,966-pair GTA5 dataset until the learning rate decays to 2×10⁻⁵ — is expected to produce stronger intermediate representations and a correspondingly larger Step 2 gain. The best checkpoint reached during the full-data Step 1 run is 38.86% CS val mIoU (+8.56 pp over the partial baseline), confirming the strong effect of source dataset completeness. The final results should be inserted in place of the placeholders `[FINAL_OVERALL_MIOU_BEFORE/AFTER]` and per-condition equivalents once training completes.
+The full-data B2 pipeline — training Step 1 on the complete 24,966-pair GTA5 dataset until the learning rate decays to 2×10⁻⁵ — is expected to produce stronger intermediate representations and a correspondingly larger Step 2 gain. The best checkpoint reached during the full-data Step 1 run is 38.90% CS val mIoU (+8.60 pp over the partial baseline), confirming the strong effect of source dataset completeness. The final results should be inserted in place of the placeholders `[FINAL_OVERALL_MIOU_BEFORE/AFTER]` and per-condition equivalents once training completes.
 
 The main scientific conclusion is clear even from the partial-data results: **sequential UDA improves ACDC segmentation, the gain is condition-specific, and the quality of the intermediate adaptation step is the primary bottleneck**. Future work should address night adaptation through condition-specific pseudo-label strategies, and should investigate whether MIC-style masked image consistency provides weather-invariant regularization in the Step 2 loop.
 
