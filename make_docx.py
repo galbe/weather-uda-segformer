@@ -209,11 +209,25 @@ while i < len(lines):
 
     # Math / formula line
     elif line.strip().startswith('$$') or 'mathcal' in line:
+        raw = line.strip().strip('$').strip()
+        # Convert common LaTeX to readable Unicode plaintext
+        for latex, plain in [
+            (r'\mathcal{L}_{\text{src}}', 'L_src'),
+            (r'\mathcal{L}_{\text{tgt}}', 'L_tgt'),
+            (r'\mathcal{L}', 'L'),
+            (r'\lambda_u', 'λ_u'),
+            (r'\cdot', '·'),
+            (r'\times', '×'),
+            (r'\leq', '≤'),
+            (r'\geq', '≥'),
+            (r'\approx', '≈'),
+        ]:
+            raw = raw.replace(latex, plain)
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p.paragraph_format.space_before = Pt(6)
         p.paragraph_format.space_after  = Pt(6)
-        run = p.add_run(line.strip().strip('$').strip())
+        run = p.add_run(raw)
         set_font(run, italic=True, size=11)
 
     # Regular paragraph
