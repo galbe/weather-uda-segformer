@@ -63,13 +63,15 @@ The present work differs from DAFormer and MIC in one critical respect: neither 
 
 ### 2.4 Adverse-Weather and ACDC-Focused Adaptation
 
-Adverse-weather adaptation is a relatively underexplored direction compared to the well-benchmarked GTA5→Cityscapes setting. **FIFO** [Lee et al., 2022] exploits ACDC's paired reference images to train a fog-invariant representation by contrasting matched clear and foggy views of the same scene. This approach directly leverages the paired structure of ACDC and achieves strong fog performance, but relies on reference pairs not available in general deployment. **RobustNet** [Choi et al., 2021] addresses weather generalization through instance-selective whitening of feature covariance, removing domain-specific style while preserving content. Neither FIFO nor RobustNet frames the problem as sequential domain adaptation using Cityscapes as a bridge.
+Adverse-weather adaptation is a relatively underexplored direction compared to the well-benchmarked GTA5→Cityscapes setting. **FIFO** [Lee et al., 2022] exploits ACDC's paired reference images to train a fog-invariant representation by contrasting matched clear and foggy views of the same scene. This approach directly leverages the paired structure of ACDC and achieves strong fog performance, but relies on reference pairs not available in general deployment. **RobustNet** [Choi et al., 2021] addresses weather generalization through instance-selective whitening of feature covariance, removing domain-specific style while preserving content. Several recent methods — including **CISS**, **CoDA**, and **ControlUDA** — address the Cityscapes→ACDC adaptation directly in a single step, treating Cityscapes as the labeled source and ACDC as the unlabeled target. None of these methods exploit a synthetic pre-adaptation stage, and none frame the problem as a two-step chain originating from GTA5.
+
+**Yang et al. [AAAI 2024]** is the closest related work to this paper. They propose a sequential multi-target UDA approach that adapts across the four ACDC weather conditions in sequence (e.g., fog→rain→snow→night), studying how to prevent forgetting of earlier conditions when adapting to new ones. Crucially, however, their pipeline uses Cityscapes as the original *labeled source* — they never start from a synthetic-to-real UDA model. There is no GTA5 pre-adaptation stage, and the sequential structure operates within ACDC rather than across the GTA5→Cityscapes→ACDC chain. This work differs in that the sequential structure spans domain types (synthetic, real clean, real adverse) rather than weather conditions within a single dataset.
 
 The **SegFormer** backbone [Xie et al., 2021] — used in this project — contributes a meaningful inductive bias for adverse-weather segmentation: its absence of positional encoding decouples predictions from absolute spatial positions, and its multi-scale hierarchical features capture both fine structural details (edges, lane markings) and coarse semantic context (sky, building facades). These properties make SegFormer more robust to the blurring and contrast reduction introduced by fog and rain compared to fixed-resolution CNN backbones.
 
 ### 2.5 Gap Addressed by This Work
 
-The central gap in prior literature is the absence of a controlled evaluation of *sequential* UDA across a synthetic-to-real-to-adverse-weather chain. Prior work either (i) adapts directly from GTA5 or Cityscapes to ACDC in a single step, without exploiting the intermediate real domain, or (ii) evaluates GTA5→Cityscapes exclusively, without considering adverse weather. This project directly fills that gap: by evaluating the same model before and after Step 2, it isolates the causal contribution of the Cityscapes→ACDC adaptation, yielding a clean answer to the research question.
+The central gap in prior literature is the absence of a controlled evaluation of *sequential* UDA across a synthetic-to-real-to-adverse-weather chain. Single-step ACDC methods (CISS, CoDA, ControlUDA) skip the synthetic pre-adaptation stage; Yang et al. [AAAI 2024] perform sequential adaptation but within ACDC conditions starting from labeled Cityscapes, not from a synthetic source. Neither family asks the question this paper addresses: does a GTA5-initialized Cityscapes-adapted model benefit from a second UDA step toward ACDC, and which conditions benefit most? By evaluating the same model before and after Step 2, this work isolates the causal contribution of the Cityscapes→ACDC adaptation and provides a clean, quantified answer.
 
 ---
 
@@ -276,6 +278,8 @@ Sakaridis, C., Dai, D., and Van Gool, L. (2021). ACDC: The adverse conditions da
 Sohn, K., Berthelot, D., Carlini, N., Zhang, Z., Zhang, H., Raffel, C. A., Cubuk, E. D., Ghassemi, M., and Li, C.-L. (2020). FixMatch: Simplifying semi-supervised learning with consistency and confidence. *NeurIPS 2020*.
 
 Tarvainen, A. and Valpola, H. (2017). Mean teachers are better role models: Weight-averaged consistency targets improve semi-supervised deep learning results. *NeurIPS 2017*.
+
+Yang, Z., et al. (2024). Sequential multi-target unsupervised domain adaptation for semantic segmentation under adverse conditions. *AAAI 2024*.
 
 Tranheden, W., Olsson, V., Pinto, J., and Svensson, L. (2021). DACS: Domain adaptation via cross-domain mixed sampling. *WACV 2021*.
 
