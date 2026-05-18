@@ -187,6 +187,8 @@ Validation mIoU progressed from 36.45% at iter 16,000 to 37.81% (18K), 38.33% (2
 
 The second adaptation step yields a net improvement of **+5.52 mIoU points** overall. The per-condition gains are strongly asymmetric: fog shows the largest absolute gain (+12.3 pp), followed by rain (+9.4 pp) and snow (+8.6 pp). Night is the only condition that regresses after Step 2 (−3.1 pp). This asymmetry is discussed in Section 6.
 
+A note on absolute mIoU levels: the figures in Table 3 reflect the inherent difficulty of this evaluation setting. The model uses zero ACDC annotations at any stage — adaptation is entirely unsupervised on the target domain. The setup is deliberately lean: a SegFormer-B2 backbone with vanilla Mean Teacher, without the rare-class sampling, ImageNet feature alignment, or CutMix augmentation used in more engineered methods such as DAFormer. Night, a fundamentally harder domain than the three weather conditions, systematically suppresses the overall average — excluding night, the fog/rain/snow conditions score 33–46% before Step 2 and 38–46% after. The scientific contribution of this work lies in the **Step 2 gain** (the delta), not the absolute level: whether unsupervised adaptation to ACDC, initialized from a Cityscapes-adapted model, produces a measurable and condition-specific improvement is the question being answered.
+
 **Table 4: Full-data pipeline results (After Step 2 pending — Step 2 training in progress).**
 
 | Stage | Overall mIoU | Fog | Rain | Snow | Night |
