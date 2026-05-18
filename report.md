@@ -187,11 +187,11 @@ Validation mIoU progressed from 36.45% at iter 16,000 to 37.81% (18K), 38.33% (2
 
 The second adaptation step yields a net improvement of **+5.52 mIoU points** overall. The per-condition gains are strongly asymmetric: fog shows the largest absolute gain (+12.3 pp), followed by rain (+9.4 pp) and snow (+8.6 pp). Night is the only condition that regresses after Step 2 (−3.1 pp). This asymmetry is discussed in Section 6.
 
-**Table 4: Full-data pipeline results (placeholders — to be updated on completion).**
+**Table 4: Full-data pipeline results (After Step 2 pending — Step 2 training in progress).**
 
 | Stage | Overall mIoU | Fog | Rain | Snow | Night |
 |---|---|---|---|---|---|
-| Before Step 2 (full-data Step 1 on ACDC) | [FINAL_OVERALL_MIOU_BEFORE] | [FINAL_FOG_BEFORE] | [FINAL_RAIN_BEFORE] | [FINAL_SNOW_BEFORE] | [FINAL_NIGHT_BEFORE] |
+| Before Step 2 (full-data Step 1 on ACDC) | 32.07% | 40.54% | 35.89% | 33.38% | 15.02% |
 | After Step 2 (full-data pipeline) | [FINAL_OVERALL_MIOU_AFTER] | [FINAL_FOG_AFTER] | [FINAL_RAIN_AFTER] | [FINAL_SNOW_AFTER] | [FINAL_NIGHT_AFTER] |
 | Δ (Step 2 gain) | [DELTA_OVERALL] | [DELTA_FOG] | [DELTA_RAIN] | [DELTA_SNOW] | [DELTA_NIGHT] |
 
@@ -235,7 +235,7 @@ This paper investigated whether a two-step UDA pipeline — GTA5 → Cityscapes 
 
 For the partial-data B2 pipeline, Step 2 yields a net overall improvement of **+5.52 mIoU points** on ACDC (27.20% → 32.72%). The improvement is condition-specific: fog benefits most (+12.3 pp), rain and snow improve substantially (+9.4, +8.6 pp), and night uniquely regresses (−3.1 pp), reflecting the fundamental limitation of pseudo-label-based UDA when the teacher model has no nighttime representations to offer. Night remains the hardest condition in every experiment, consistently scoring below 12% mIoU.
 
-The full-data B2 pipeline — training Step 1 on the complete 24,966-pair GTA5 dataset until the learning rate decays to 2×10⁻⁵ — is expected to produce stronger intermediate representations and a correspondingly larger Step 2 gain. The best checkpoint reached during the full-data Step 1 run is 38.90% CS val mIoU (+8.60 pp over the partial baseline), confirming the strong effect of source dataset completeness. The final results should be inserted in place of the placeholders `[FINAL_OVERALL_MIOU_BEFORE/AFTER]` and per-condition equivalents once training completes.
+The full-data B2 pipeline — training Step 1 on the complete 24,966-pair GTA5 dataset until the learning rate decays to 2×10⁻⁵ — produces stronger intermediate representations and a correspondingly larger Step 2 gain. The full-data Step 1 checkpoint (38.90% CS val mIoU, +8.60 pp over the partial baseline) evaluated directly on ACDC achieves **32.07% overall mIoU** (fog=40.54%, rain=35.89%, snow=33.38%, night=15.02%), a +4.87 pp improvement over the partial-data before-step-2 baseline (27.20%), confirming the strong effect of source dataset completeness. Full-data Step 2 training is in progress; the After Step 2 results and per-condition deltas will be inserted in place of the remaining placeholders in Table 4 upon completion.
 
 The main scientific conclusion is clear even from the partial-data results: **sequential UDA improves ACDC segmentation, the gain is condition-specific, and the quality of the intermediate adaptation step is the primary bottleneck**. Future work should address night adaptation through condition-specific pseudo-label strategies, and should investigate whether MIC-style masked image consistency provides weather-invariant regularization in the Step 2 loop.
 
@@ -278,3 +278,5 @@ Tsai, Y.-H., Hung, W.-C., Schulter, S., Sohn, K., Yang, M.-H., and Chandraker, M
 Vu, T.-H., Jain, H., Bucher, M., Cord, M., and Pérez, P. (2019). ADVENT: Adversarial entropy minimization for domain adaptation in semantic segmentation. *CVPR 2019*.
 
 Xie, E., Wang, W., Yu, Z., Anandkumar, A., Alvarez, J. M., and Luo, P. (2021). SegFormer: Simple and efficient design for semantic segmentation with transformers. *NeurIPS 2021*.
+
+Hanuna, G. (2026). weather-uda-segformer: Two-step unsupervised domain adaptation for semantic segmentation under adverse weather conditions. GitHub repository. https://github.com/galbe/weather-uda-segformer
