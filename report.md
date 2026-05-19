@@ -4,7 +4,7 @@
 **Course:** MSc Computer Vision
 **Date:** May 2026
 
----
+--- 
 
 ## Abstract
 
